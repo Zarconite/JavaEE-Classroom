@@ -23,7 +23,7 @@ public class TraineeMapRepository implements TraineeRepository{
 	public String createTrainee(String traineeData) {
 		Trainee newAccount = util.getObjectForJSON(traineeData, Trainee.class);
 		traineeMap.put(newAccount.getTraineeID(), newAccount);
-		return "Created new trainee with info: Name: " + newAccount.getTraineeName()+".";
+		return "Created new trainee with name: " + newAccount.getTraineeName()+".";
 	}
 
 	public String deleteTrainee(Long id) {

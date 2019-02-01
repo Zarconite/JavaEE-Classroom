@@ -13,6 +13,7 @@ import javax.persistence.Query;
 import javax.transaction.Transactional;
 
 import com.qa.classroom.persistence.domain.Classroom;
+import com.qa.classroom.persistence.domain.Trainee;
 import com.qa.classroom.util.JSONUtil;
 
 @Transactional(SUPPORTS)
@@ -28,11 +29,13 @@ public class ClassroomDatabaseRepository implements ClassroomRepository{
 	public String createClassroom(String classroomData) {
 		Classroom newClassroom = util.getObjectForJSON(classroomData, Classroom.class);
 		em.persist(newClassroom);
-		return "{\"message\": \"account has been sucessfully added\"}";
+		return "{\"message\": \"Classroom has been sucessfully added\"}";
 	}
 	
 	public String getAllClassrooms() {
-		Query findAll = em.createQuery("SELECT a FROM Classroom a");
+		//Query findAll = em.createQuery("select c.classroomID, c.trainer, t.traineeID, "
+		//	+ "t.traineeName from Classroom c, Trainee t where c.classroomID = t.classroomID");
+		Query findAll = em.createQuery("SELECT c FROM Classroom c");
 		return util.getJSONForObject((Collection<Classroom>) findAll.getResultList());
 	}
 	
@@ -44,22 +47,24 @@ public class ClassroomDatabaseRepository implements ClassroomRepository{
 	@Transactional(REQUIRED)
 	public String updateClassroom(Long id, String classroomData) {
 		String currentClassroom = findClassroom(id);
+		Classroom classroomObject = util.getObjectForJSON(classroomData, Classroom.class);
 		if (currentClassroom != "null") {
-			deleteClassroom(id);
-			createClassroom(classroomData);
-			return "{\"message\": \"account sucessfully updated\"}";
+			em.createQuery("update Classroom set trainer = '"+classroomObject.getTrainer()
+			+"' where classroomID = "+id).executeUpdate();
+			return "{\"message\": \"Classroom sucessfully updated\"}";
 		}
-		return "{\"message\": \"account not found\"}";
+		return "{\"message\": \"Classroom not found\"}";
 	}
 
 	@Transactional(REQUIRED)
 	public String deleteClassroom(Long id) {
-		String classroomInDB = findClassroom(id);
-		if (classroomInDB != "null") {
-			em.remove(classroomInDB);
-			return "{\"message\": \"account sucessfully deleted\"}";
+		String classroom = findClassroom(id);
+		Classroom classroomToDelete = util.getObjectForJSON(classroom, Classroom.class);
+		if (classroom != "null") {
+			em.remove(em.contains(classroomToDelete) ? classroomToDelete : em.merge(classroomToDelete));
+			return "{\"message\": \"Classroom sucessfully deleted\"}";
 		}
-		return "{\"message\": \"account not found\"}";
+		return "{\"message\": \"Classroom not found\"}";
 	}
 	
 }

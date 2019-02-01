@@ -13,6 +13,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
 
+import com.qa.classroom.persistence.domain.Classroom;
 import com.qa.classroom.persistence.domain.Trainee;
 import com.qa.classroom.util.JSONUtil;
 
@@ -29,11 +30,11 @@ public class TraineeDatabaseRepository implements TraineeRepository{
 	public String createTrainee(String traineeName) {
 		Trainee newTrainee = util.getObjectForJSON(traineeName, Trainee.class);
 		em.persist(newTrainee);
-		return "{\"message\": \"account has been sucessfully added\"}";
+		return "{\"message\": \"Trainee has been sucessfully added\"}";
 	}
 	
 	public String getAllTrainees() {
-		Query findAll = em.createQuery("SELECT a FROM Account a");
+		Query findAll = em.createQuery("SELECT a FROM Trainee a");
 		return util.getJSONForObject((Collection<Trainee>) findAll.getResultList());
 	}
 	
@@ -43,24 +44,26 @@ public class TraineeDatabaseRepository implements TraineeRepository{
 	}
 	
 	@Transactional(REQUIRED)
-	public String updateTrainee(Long id, String traineeName) {
-		String currentAccount = findTrainee(id);
-		if (currentAccount != "null") {
-			deleteTrainee(id);
-			createTrainee(traineeName);
-			return "{\"message\": \"account sucessfully updated\"}";
+	public String updateTrainee(Long id, String traineeData) {
+		String currentTrainee = findTrainee(id);
+		Trainee trainee = util.getObjectForJSON(traineeData, Trainee.class);
+		if (currentTrainee != "null") {
+			em.createQuery("update Trainee set classroomID = "+trainee.getClassroomID()+", traineeName = '"+trainee.getTraineeName()
+			+"' where traineeID = "+id).executeUpdate();
+			return "{\"message\": \"Trainee sucessfully updated\"}";
 		}
-		return "{\"message\": \"account not found\"}";
+		return "{\"message\": \"Trainee not found\"}";
 	}
 
 	@Transactional(REQUIRED)
 	public String deleteTrainee(Long id) {
 		String trainee = findTrainee(id);
+		Trainee traineeToDelete = util.getObjectForJSON(trainee, Trainee.class);
 		if (trainee != "null") {
-			em.remove(trainee);
-			return "{\"message\": \"account sucessfully deleted\"}";
+			em.remove(em.contains(traineeToDelete) ? traineeToDelete : em.merge(traineeToDelete));
+			return "{\"message\": \"Trainee sucessfully deleted\"}";
 		}
-		return "{\"message\": \"account not found\"}";
+		return "{\"message\": \"Trainee not found\"}";
 	}
 	
 }

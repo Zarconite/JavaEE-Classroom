@@ -7,20 +7,24 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-@Entity(name = "Classroom")
-@Table(name = "Classroom")
+@Entity(name = "Trainee")
+@Table(name = "Trainee")
 public class Trainee {
 
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long traineeID;
+	
+	@Column private Long classroomID;
+	
 	@Column private String traineeName;
 	
 	public Trainee() {
 
 	}
 	
-	public Trainee(String traineeName) {
+	public Trainee(String traineeName,Long classroomID) {
 		this.traineeName = traineeName;
+		this.classroomID = classroomID;
 	}
 
 	public String getTraineeName() {
@@ -37,6 +41,14 @@ public class Trainee {
 
 	public void setTraineeID(Long traineeID) {
 		this.traineeID = traineeID;
+	}
+
+	public Long getClassroomID() {
+		return classroomID;
+	}
+
+	public void setClassroomID(Long classroomID) {
+		this.classroomID = classroomID;
 	}
 
 }
